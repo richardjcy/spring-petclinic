@@ -1,23 +1,28 @@
-#!groovy
+node {
 
-pipeline {
-  agent none
-  stages {
-    stage('Maven Install') {
-      agent {
-        docker {
-          image 'maven:3.5.0'
-        }
-      }
-      steps {
-        sh 'mvn clean install'
-      }
-    }
-    stage('Docker Build') {
-      agent any
-      steps {
-        sh 'docker build -t richardjcy/spring-petclinic:latest .'
-      }
-    }
-  }
+   stage('Clone Repository') {
+        // Get some code from a GitHub repository
+        git 'https://github.com/richardjcy/spring-petclinic.git'
+    
+   }
+   stage('Build Maven Image') {
+        docker.build("maven-build }
+   
+   stage('Run Maven Container') {
+       
+        //Remove maven-build-container if it exists
+        sh " docker rm -f maven-build-container"
+        
+        //Run maven image
+        sh "docker run --rm --name maven-build-container maven-build"
+   }
+   
+   stage('Deploy Spring Boot Application') {
+        
+         //Remove maven-build-container if it exists
+        sh " docker rm -f java-deploy-container"
+       
+        sh "docker run --name java-deploy-container --volumes-from maven-build-container -d -p 8080:8080 richardjcy/petclinic-deploy"
+   }
+
 }
